@@ -52,20 +52,12 @@ func (h *handler) handle(ctx context.Context, request Request) (Response, error)
 
 	tenantPerms := make([]string, len(forUser.TenantPermissions))
 	for i, p := range forUser.TenantPermissions {
-		tenantPerms[i], err = p.Format(permissions.FormatPermission)
-		if err != nil {
-			slog.Error("error formatting tenant permission", "error", err.Error())
-			return Response{}, err
-		}
+		tenantPerms[i] = p.Name
 	}
 
 	userPerms := make([]string, len(forUser.UserPermissions))
 	for i, p := range forUser.UserPermissions {
-		userPerms[i], err = p.Format(permissions.FormatPermission)
-		if err != nil {
-			slog.Error("error formatting user permission", "error", err.Error())
-			return Response{}, err
-		}
+		userPerms[i] = p.Name
 	}
 
 	resources := make([]Resource, len(forUser.Resources))
