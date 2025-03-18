@@ -30,3 +30,7 @@ func (pr *PermissionsRepo) GetUserPermissions(ctx context.Context, userID string
 func (pr *PermissionsRepo) GetUserResources(ctx context.Context, userID string) (permissions.Resources, error) {
 	return nil, nil
 }
+
+func (pr *PermissionsRepo) GetUserRole(ctx context.Context, userID string) (*permissions.Role, error) {
+	return nil, nil
+}

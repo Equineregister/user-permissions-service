@@ -23,6 +23,7 @@ type Request struct {
 type Response struct {
 	TenantID          string     `json:"tenantId"`
 	UserID            string     `json:"userId"`
+	Role              string     `json:"role"`
 	TenantPermissions []string   `json:"tenantPermissions"`
 	UserPermissions   []string   `json:"userPermissions"`
 	UserResources     []Resource `json:"userResources"`
@@ -34,19 +35,54 @@ type Resource struct {
 }
 
 type handler struct {
-	repo permissions.Reader
+	repo    permissions.Reader
+	service *permissions.Service
 }
 
 // Handler is the Lambda function handler
 func (h *handler) handle(ctx context.Context, request Request) (Response, error) {
 	slog.Debug("received request", "tenantId", request.TenantID, "userId", request.UserID)
 
-	// TODO - call service layer
+	forUser, err := h.service.GetForUser(ctx, request.TenantID, request.UserID, request.Resources)
+
+	if err != nil {
+		slog.Error("error getting permissions for user", "error", err.Error())
+		return Response{}, err
+	}
+
+	tenantPerms := make([]string, len(forUser.TenantPermissions))
+	for i, p := range forUser.TenantPermissions {
+		tenantPerms[i], err = p.Format(permissions.FormatPermission)
+		if err != nil {
+			slog.Error("error formatting tenant permission", "error", err.Error())
+			return Response{}, err
+		}
+	}
+
+	userPerms := make([]string, len(forUser.UserPermissions))
+	for i, p := range forUser.UserPermissions {
+		userPerms[i], err = p.Format(permissions.FormatPermission)
+		if err != nil {
+			slog.Error("error formatting user permission", "error", err.Error())
+			return Response{}, err
+		}
+	}
+
+	resources := make([]Resource, len(forUser.Resources))
+	for i, r := range forUser.Resources {
+		resources[i] = Resource{
+			ResourceID:   r.ID,
+			ResourceType: r.Type,
+		}
+	}
 
 	return Response{
-		TenantID: request.TenantID,
-		UserID:   request.UserID,
-		// TODO
+		TenantID:          request.TenantID,
+		UserID:            request.UserID,
+		Role:              forUser.Role.String(),
+		TenantPermissions: tenantPerms,
+		UserPermissions:   userPerms,
+		UserResources:     resources,
 	}, nil
 }
 
@@ -61,8 +97,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	repo := postgres.NewPermissionsRepo(cfg)
+	service := permissions.NewService(repo)
+
 	h := &handler{
-		repo: postgres.NewPermissionsRepo(cfg),
+		repo:    repo,
+		service: service,
 	}
 
 	lambda.Start(h.handle)
