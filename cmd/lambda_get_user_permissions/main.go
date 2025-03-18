@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/Equineregister/user-permissions-service/internal/adapter/secondary/postgres"
+	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
 	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -32,11 +34,14 @@ type Resource struct {
 }
 
 type handler struct {
+	repo permissions.Reader
 }
 
 // Handler is the Lambda function handler
 func (h *handler) handle(ctx context.Context, request Request) (Response, error) {
 	slog.Debug("received request", "tenantId", request.TenantID, "userId", request.UserID)
+
+	// TODO - call service layer
 
 	return Response{
 		TenantID: request.TenantID,
@@ -56,7 +61,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	h := &handler{}
+	h := &handler{
+		repo: postgres.NewPermissionsRepo(cfg),
+	}
 
 	lambda.Start(h.handle)
 }
