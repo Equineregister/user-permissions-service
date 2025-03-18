@@ -24,7 +24,7 @@ type TenantPool struct {
 	port int
 }
 
-func (tp *TenantPool) GetTenantConn(ctx context.Context) (*pgxpool.Pool, error) {
+func (tp *TenantPool) GetTenantConnection(ctx context.Context) (*pgxpool.Pool, error) {
 	tenantID, ok := tp.extractTenantID(ctx)
 	if !ok {
 		return nil, fmt.Errorf("tenantID not found in context: %v", tenantID)

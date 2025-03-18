@@ -7,6 +7,7 @@ import (
 	"github.com/Equineregister/user-permissions-service/internal/adapter/secondary/postgres"
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
+	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
 	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/aws/aws-lambda-go/lambda"
 	"golang.org/x/exp/slog"
@@ -43,8 +44,10 @@ type handler struct {
 func (h *handler) handle(ctx context.Context, request Request) (Response, error) {
 	slog.Debug("received request", "tenantId", request.TenantID, "userId", request.UserID)
 
-	forUser, err := h.service.GetForUser(ctx, request.TenantID, request.UserID, request.Resources)
+	ctx = context.WithValue(ctx, contextkey.CtxKeyTenantID, request.TenantID)
+	ctx = context.WithValue(ctx, contextkey.CtxKeyUserID, request.UserID)
 
+	forUser, err := h.service.GetForUser(ctx, request.Resources)
 	if err != nil {
 		slog.Error("error getting permissions for user", "error", err.Error())
 		return Response{}, err
