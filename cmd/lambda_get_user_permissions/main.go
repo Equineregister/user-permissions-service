@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/Equineregister/user-permissions-service/internal/adapter/secondary/postgres"
+	"github.com/Equineregister/user-permissions-service/internal/adapters/secondary/postgres"
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
