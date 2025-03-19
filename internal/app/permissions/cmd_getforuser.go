@@ -73,11 +73,13 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	if err := eg.Wait(); err != nil {
 		return nil, fmt.Errorf("get for user: %w", err)
 	}
+
 	close(chTenantPermissions)
 	close(chUserPermissions)
 	close(chUserExtraPermissions)
 	close(chUserRevokedPermissions)
 	close(chRoles)
+	close(chResources)
 
 	// Combine the user permissions with the extra permissions and remove the revoked permissions
 	// This is done in the service layer to keep the repository layer simple.
@@ -89,6 +91,7 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	up = append(up, extra...)
 
 	// Remove revoked permissions. Do this after adding the extra permissions to ensure that the revoked permissions are removed.
+
 	for _, r := range revoked {
 		for i, p := range up {
 			if p.ID == r.ID {

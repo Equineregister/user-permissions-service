@@ -60,7 +60,7 @@ func (pr *PermissionsRepo) getTenantPermissions(ctx context.Context, tx pgx.Tx, 
 			tenant_permissions tp
 			JOIN permissions p ON tp.permission_id = p.permission_id
 		WHERE 
-			p.permission_name ILIKE ANY (ARRAY[@permission_names])
+			p.permission_name ILIKE ANY (@permission_names::text[])
 		ORDER BY
         	p.permission_name ASC
 		`,
@@ -166,7 +166,7 @@ func (pr *PermissionsRepo) getUserPermissionsFromRoles(ctx context.Context, tx p
         WHERE 
 			role_id = ANY(@role_ids)
 			AND
-			p.permission_name ILIKE ANY (ARRAY[@permission_names])
+			p.permission_name ILIKE ANY (@permission_names::text[])
 		`, pgx.NamedArgs{
 		"role_ids":         userRoles.GetIDs(),
 		"permission_names": permissionNamesForResources(resources),
@@ -199,7 +199,7 @@ func (pr *PermissionsRepo) getUserPermissionsExtraAndRevoked(ctx context.Context
 			SELECT 
 				up.permission_id, 
 				p.permission_name, 
-				up.permission_type, 
+				up.permission_type
 			FROM 
 				user_permissions up
 			JOIN 
@@ -207,7 +207,7 @@ func (pr *PermissionsRepo) getUserPermissionsExtraAndRevoked(ctx context.Context
 			WHERE 
 				up.user_id = @user_id
 				AND
-				p.permission_name ILIKE ANY (ARRAY[@permission_names])
+				p.permission_name ILIKE ANY (@permission_names::text[])
 		`, pgx.NamedArgs{
 		"user_id":          userID,
 		"permission_names": permissionNamesForResources(resources),
@@ -275,15 +275,15 @@ func (pr *PermissionsRepo) GetUserResources(ctx context.Context, resources []str
 func (pr *PermissionsRepo) getUserResources(ctx context.Context, tx pgx.Tx, userID string, resources []string) (permissions.Resources, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT 
-			r.resource_id, r.resource_type
+			ur.resource_id, rt.resource_type_name
 		FROM 
 			user_resources ur
 		JOIN 
-			resources r ON ur.resource_id = r.resource_id
+			resource_types rt ON ur.resource_type_id = rt.resource_type_id
 		WHERE 
 			ur.user_id = @user_id
 		AND
-			r.resource_type = ANY(@resource_types)
+			rt.resource_type_name ILIKE ANY(@resource_types::text[])
 		`, pgx.NamedArgs{
 		"user_id":        userID,
 		"resource_types": resources,

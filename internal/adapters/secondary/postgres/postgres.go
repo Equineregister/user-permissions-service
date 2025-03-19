@@ -2,23 +2,13 @@ package postgres
 
 import (
 	"context"
-	"fmt"
-	"strings"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func whereSQL(where []string) string {
-	if len(where) == 0 {
-		return ""
-	}
-
-	return "WHERE " + strings.Join(where, " AND ")
-}
-
-func rollback(ctx context.Context, tx pgx.Tx) error {
+func rollback(ctx context.Context, tx pgx.Tx) {
 	if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
-		return fmt.Errorf("failed to rollback transaction: %w", err)
+		slog.Error("Failed to rollback transaction", "error", err.Error())
 	}
-	return nil
 }
