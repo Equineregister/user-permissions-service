@@ -58,7 +58,7 @@ func (pr *PermissionsRepo) getTenantPermissions(ctx context.Context, tx pgx.Tx, 
         	p.permission_name ASC
 		`,
 		pgx.NamedArgs{
-			"permission_names": getPermissionNamesFromResources(resources),
+			"permission_names": permissionNamesForResources(resources),
 		})
 	if err != nil {
 		return nil, fmt.Errorf("query tenant_permissions: %w", err)
@@ -95,14 +95,11 @@ func (pr *PermissionsRepo) GetUserPermissions(ctx context.Context, resources []s
 	}
 	defer rollback(ctx, tx)
 
+	// We must get the User's roles first, then get the permissions from those roles. -- TODO: Combine into one query??
 	roles, err := pr.getUserRoles(ctx, tx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get user roles: %w", err)
 	}
-	if len(roles) == 0 {
-		return nil, nil
-	}
-
 	up, err := pr.getUserPermissionsFromRoles(ctx, tx, roles, resources)
 	if err != nil {
 		return nil, fmt.Errorf("get user permissions from roles: %w", err)
@@ -113,6 +110,35 @@ func (pr *PermissionsRepo) GetUserPermissions(ctx context.Context, resources []s
 	}
 
 	return up, nil
+}
+
+func (pr *PermissionsRepo) GetUserPermissionsExtraAndRevoked(ctx context.Context, resources []string) (permissions.UserExtraPermissions, permissions.UserRevokedPermissions, error) {
+	userID, found := extractUserID(ctx)
+	if !found {
+		return nil, nil, fmt.Errorf("user ID not found in context")
+	}
+
+	pool, err := pr.tenantPool.GetTenantConnection(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get tenant connection: %w", err)
+	}
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("begin: %w", err)
+	}
+	defer rollback(ctx, tx)
+
+	// Get extra and revoked permissions
+	extra, revoked, err := pr.getUserPermissionsExtraAndRevoked(ctx, tx, userID, resources)
+	if err != nil {
+		return nil, nil, fmt.Errorf("get user permissions extra and revoked: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, nil, fmt.Errorf("commit: %w", err)
+	}
+
+	return extra, revoked, nil
 }
 
 func (pr *PermissionsRepo) getUserPermissionsFromRoles(ctx context.Context, tx pgx.Tx, userRoles permissions.Roles, resources []string) (permissions.UserPermissions, error) {
@@ -136,7 +162,7 @@ func (pr *PermissionsRepo) getUserPermissionsFromRoles(ctx context.Context, tx p
 			p.permission_name ILIKE ANY (ARRAY[@permission_names])
 		`, pgx.NamedArgs{
 		"role_ids":         userRoles.GetIDs(),
-		"permission_names": getPermissionNamesFromResources(resources),
+		"permission_names": permissionNamesForResources(resources),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("query role_permissions: %w", err)
@@ -158,11 +184,122 @@ func (pr *PermissionsRepo) getUserPermissionsFromRoles(ctx context.Context, tx p
 	}
 
 	return rolePermissions, nil
-
 }
 
-func (pr *PermissionsRepo) GetUserResources(ctx context.Context) (permissions.Resources, error) {
-	return nil, nil
+func (pr *PermissionsRepo) getUserPermissionsExtraAndRevoked(ctx context.Context, tx pgx.Tx, userID string, resources []string) (permissions.UserExtraPermissions, permissions.UserRevokedPermissions, error) {
+
+	rows, err := tx.Query(ctx, `
+			SELECT 
+				up.permission_id, 
+				p.permission_name, 
+				up.permission_type, 
+			FROM 
+				user_permissions up
+			JOIN 
+				permissions p ON up.permission_id = p.permission_id
+			WHERE 
+				up.user_id = @user_id
+				AND
+				p.permission_name ILIKE ANY (ARRAY[@permission_names])
+		`, pgx.NamedArgs{
+		"user_id":          userID,
+		"permission_names": permissionNamesForResources(resources),
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("query user_permissions: %w", err)
+	}
+	defer rows.Close()
+
+	extra := make(permissions.UserExtraPermissions, 0)
+	revoked := make(permissions.UserRevokedPermissions, 0)
+	for rows.Next() {
+
+		var up permissions.UserPermission
+		var permissionType string
+		if err := rows.Scan(&up.ID, &up.Name, &permissionType); err != nil {
+			return nil, nil, fmt.Errorf("scan user_permissions: %w", err)
+		}
+
+		switch {
+		case permissionType == "extra":
+			extra = append(extra, up)
+		case permissionType == "revoked":
+			revoked = append(revoked, up)
+		default:
+			return nil, nil, fmt.Errorf("unknown permission type: %s", permissionType)
+		}
+	}
+
+	if rows.Err() != nil {
+		return nil, nil, fmt.Errorf("rows user_permissions: %w", rows.Err())
+	}
+
+	return extra, revoked, nil
+}
+
+func (pr *PermissionsRepo) GetUserResources(ctx context.Context, resources []string) (permissions.Resources, error) {
+	userID, found := extractUserID(ctx)
+	if !found {
+		return nil, fmt.Errorf("user ID not found in context")
+	}
+
+	pool, err := pr.tenantPool.GetTenantConnection(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get tenant connection: %w", err)
+	}
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin: %w", err)
+	}
+	defer rollback(ctx, tx)
+
+	res, err := pr.getUserResources(ctx, tx, userID, resources)
+	if err != nil {
+		return nil, fmt.Errorf("get user resources: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+
+	return res, nil
+}
+
+func (pr *PermissionsRepo) getUserResources(ctx context.Context, tx pgx.Tx, userID string, resources []string) (permissions.Resources, error) {
+	rows, err := tx.Query(ctx, `
+		SELECT 
+			r.resource_id, r.resource_type
+		FROM 
+			user_resources ur
+		JOIN 
+			resources r ON ur.resource_id = r.resource_id
+		WHERE 
+			ur.user_id = @user_id
+		AND
+			r.resource_type = ANY(@resource_types)
+		`, pgx.NamedArgs{
+		"user_id":        userID,
+		"resource_types": resources,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("query user_resources: %w", err)
+	}
+	defer rows.Close()
+
+	var userResources permissions.Resources
+	for rows.Next() {
+		var ur permissions.Resource
+		if err := rows.Scan(&ur.ID, &ur.Type); err != nil {
+			return nil, fmt.Errorf("scan user_resources: %w", err)
+		}
+		userResources = append(userResources, ur)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows user_resources: %w", rows.Err())
+	}
+
+	return userResources, nil
 }
 
 func (pr *PermissionsRepo) GetUserRoles(ctx context.Context) (permissions.Roles, error) {
@@ -227,7 +364,7 @@ func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID s
 	return userRoles, nil
 }
 
-func getPermissionNamesFromResources(resources []string) []string {
+func permissionNamesForResources(resources []string) []string {
 	if len(resources) == 0 {
 		return []string{"%"} // Match everything
 	}

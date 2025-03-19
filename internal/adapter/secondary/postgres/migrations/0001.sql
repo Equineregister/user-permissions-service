@@ -55,6 +55,19 @@ CREATE TABLE user_roles (
 CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
 CREATE INDEX idx_user_roles_role_id ON user_roles (role_id);
 
+CREATE TABLE user_permissions (
+    user_id UUID NOT NULL,
+    permission_id UUID NOT NULL,
+    permission_type TEXT NOT NULL CHECK (permission_type IN ('extra', 'revoked')),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (user_id, permission_id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
+);
+CREATE INDEX idx_user_permissions_user_id ON user_permissions (user_id);
+CREATE INDEX idx_user_permissions_permission_id ON user_permissions (permission_id); 
+CREATE INDEX idx_user_permissions_permission_type ON user_permissions (permission_type);
+
 -- user_resources are the resources that are assigned to a User.
 CREATE TABLE user_resources (
     user_resources_id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

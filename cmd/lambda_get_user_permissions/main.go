@@ -24,7 +24,7 @@ type Request struct {
 type Response struct {
 	TenantID          string     `json:"tenantId"`
 	UserID            string     `json:"userId"`
-	Role              string     `json:"role"`
+	Roles             []string   `json:"roles"`
 	TenantPermissions []string   `json:"tenantPermissions"`
 	UserPermissions   []string   `json:"userPermissions"`
 	UserResources     []Resource `json:"userResources"`
@@ -53,16 +53,6 @@ func (h *handler) handle(ctx context.Context, request Request) (Response, error)
 		return Response{}, err
 	}
 
-	tenantPerms := make([]string, len(forUser.TenantPermissions))
-	for i, p := range forUser.TenantPermissions {
-		tenantPerms[i] = p.Name
-	}
-
-	userPerms := make([]string, len(forUser.UserPermissions))
-	for i, p := range forUser.UserPermissions {
-		userPerms[i] = p.Name
-	}
-
 	resources := make([]Resource, len(forUser.Resources))
 	for i, r := range forUser.Resources {
 		resources[i] = Resource{
@@ -74,9 +64,9 @@ func (h *handler) handle(ctx context.Context, request Request) (Response, error)
 	return Response{
 		TenantID:          request.TenantID,
 		UserID:            request.UserID,
-		Role:              forUser.Role.String(),
-		TenantPermissions: tenantPerms,
-		UserPermissions:   userPerms,
+		Roles:             forUser.Roles.StringSlice(),
+		TenantPermissions: forUser.TenantPermissions.StringSlice(),
+		UserPermissions:   forUser.UserPermissions.StringSlice(),
 		UserResources:     resources,
 	}, nil
 }
