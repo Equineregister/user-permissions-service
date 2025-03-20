@@ -50,6 +50,7 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 		Roles: permissions.Roles{
 			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: permissions.UserPermissions{
 			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
@@ -66,10 +67,12 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 	userSalesPerson: {
 		TenantPermissions: expectedTenantPermissionsNoResources,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: permissions.UserPermissions{
 			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
 		},
 		Resources: permissions.Resources{
 			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
@@ -104,6 +107,7 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 		Roles: permissions.Roles{
 			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: permissions.UserPermissions{
 			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
@@ -118,6 +122,7 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 		TenantPermissions: expectedTenantPermissionsProductsResource,
 		Roles: permissions.Roles{
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: nil,
 		Resources:       nil,
@@ -148,6 +153,7 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 		Roles: permissions.Roles{
 			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: permissions.UserPermissions{
 			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
@@ -160,9 +166,11 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 		TenantPermissions: expectedTenantPermissionsInvoicesResource,
 		Roles: permissions.Roles{
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		UserPermissions: permissions.UserPermissions{
 			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
 		},
 		Resources: permissions.Resources{
 			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},

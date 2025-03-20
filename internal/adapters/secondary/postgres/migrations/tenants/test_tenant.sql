@@ -1,13 +1,16 @@
 -- Insert test data into roles
 INSERT INTO roles (role_id, role_name) VALUES
     ('550e8400-e29b-41d4-a716-446655440000', 'admin'),
+    ('da244750-f014-415c-b7b9-43ead3d8fa25', 'sales auditor'),
     ('123e4567-e89b-12d3-a456-426614174000', 'sales person'),
     ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'sales manager');
 
 -- Insert test data into role_hierarchy
 INSERT INTO role_hierarchy (parent_role_id, child_role_id) VALUES
     -- Sales Manager inherits from Sales Person
-    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '123e4567-e89b-12d3-a456-426614174000');
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '123e4567-e89b-12d3-a456-426614174000'),
+    -- Sales Person inherits from Sales Auditor
+    ('123e4567-e89b-12d3-a456-426614174000', 'da244750-f014-415c-b7b9-43ead3d8fa25');
 
 -- Insert test data into permissions
 INSERT INTO permissions (permission_id, permission_name) VALUES
@@ -40,11 +43,14 @@ INSERT INTO role_permissions (role_id, permission_id, created_at) VALUES
     ('550e8400-e29b-41d4-a716-446655440000', 'df6ae9bc-e957-41c1-a683-3773667c7628', NOW()),
     ('550e8400-e29b-41d4-a716-446655440000', '62752f21-fbe2-4301-a72d-7dc8963e08e2', NOW()),
     ('550e8400-e29b-41d4-a716-446655440000', 'acecdadf-f527-45bf-8123-353b7ee8dc6a', NOW()),
+    -- The Sales Auditor can read invoices.
+    ('da244750-f014-415c-b7b9-43ead3d8fa25', '8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
     -- The Sales Person can create invoices.
+    -- They can also read invoices, due to role inheritance from Sales Auditor.
     ('123e4567-e89b-12d3-a456-426614174000', '2f9606d8-4bff-46e7-bd8f-ae9e476d3995', NOW()),
-    -- The Sales Manager can read and delete invoices and create, read and disable products. 
-    -- They can also create invoices, due to role inheritance from Sales Person (not required to be inserted here)
-    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
+    -- The Sales Manager can delete invoices and create, read and disable products. 
+    -- They can also create invoices, due to role inheritance from Sales Person.
+    -- They can also read invoices, due to role inheritance from Sales Auditor -> Sales Person.
     ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '41c21275-b7d5-4031-b551-b5e293b85319', NOW()),
     ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '62752f21-fbe2-4301-a72d-7dc8963e08e2', NOW()),
     ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'df6ae9bc-e957-41c1-a683-3773667c7628', NOW()),

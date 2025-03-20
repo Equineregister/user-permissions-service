@@ -6,11 +6,11 @@ CREATE TABLE roles (
 CREATE INDEX idx_roles_role_name ON roles (role_name);
 
 -- role_hierarchy is the hierarchy of roles.
--- A role can have zero or more multiple child roles.
--- A role can have zero or more parent roles.
+-- A role (parent_role_id) can inherit permissions from another role (child_role_id).
+-- A role can inherit permissions from multiple roles.
 CREATE TABLE role_hierarchy (
-    parent_role_id UUID,
-    child_role_id UUID,
+    parent_role_id UUID NOT NULL,
+    child_role_id UUID NOT NULL,
     FOREIGN KEY (parent_role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
     FOREIGN KEY (child_role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
     PRIMARY KEY (parent_role_id, child_role_id),
