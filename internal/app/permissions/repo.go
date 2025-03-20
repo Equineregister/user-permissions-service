@@ -8,9 +8,13 @@ type Reader interface {
 	GetUserPermissionsExtraAndRevoked(ctx context.Context, resources []string) (UserExtraPermissions, UserRevokedPermissions, error)
 	GetUserResources(ctx context.Context, resources []string) (Resources, error)
 	GetUserRoles(ctx context.Context) (Roles, error)
+	GetTenantRoles(ctx context.Context) (Roles, error)
+	GetTenantRoleMap(ctx context.Context, resources []string) (TenantRoleMap, error)
 }
 
-type Writer interface{}
+type Writer interface {
+	// Nothing yet.
+}
 
 type ReaderWriter interface {
 	Reader

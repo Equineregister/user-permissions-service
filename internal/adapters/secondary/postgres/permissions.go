@@ -349,7 +349,7 @@ func (pr *PermissionsRepo) GetUserRoles(ctx context.Context) (permissions.Roles,
 }
 
 func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
-	directRoles, err := pr.getDirectRoles(ctx, tx, userID)
+	directRoles, err := pr.getUserDirectRoles(ctx, tx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get direct roles: %w", err)
 	}
@@ -374,7 +374,7 @@ func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID s
 	return append(directRoles, allChildRoles...), nil
 }
 
-func (pr *PermissionsRepo) getDirectRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
+func (pr *PermissionsRepo) getUserDirectRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT 
 			ur.role_id, r.role_name
@@ -445,6 +445,154 @@ func (pr *PermissionsRepo) getChildRoles(ctx context.Context, tx pgx.Tx, assigne
 	}
 
 	return childRoles, nil
+}
+
+func (pr *PermissionsRepo) GetTenantRoles(ctx context.Context) (permissions.Roles, error) {
+	pool, err := pr.tenantPool.GetTenantConnection(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get tenant connection: %w", err)
+	}
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin: %w", err)
+	}
+	defer rollback(ctx, tx)
+
+	roles, err := pr.getTenantRoles(ctx, tx)
+	if err != nil {
+		return nil, fmt.Errorf("get tenant roles: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+
+	return roles, nil
+}
+
+func (pr *PermissionsRepo) getTenantRoles(ctx context.Context, tx pgx.Tx) (permissions.Roles, error) {
+
+	allRoles, err := pr.getAllRoles(ctx, tx)
+	if err != nil {
+		return nil, fmt.Errorf("get direct roles: %w", err)
+	}
+	if len(allRoles) == 0 {
+		return nil, nil
+	}
+
+	return allRoles, nil
+}
+
+func (pr *PermissionsRepo) getAllRoles(ctx context.Context, tx pgx.Tx) (permissions.Roles, error) {
+	rows, err := tx.Query(ctx, `
+		SELECT 
+			r.role_id, r.role_name
+		FROM 
+			roles r
+		ORDER BY
+			r.role_name ASC
+		`)
+	if err != nil {
+		return nil, fmt.Errorf("query roles: %w", err)
+	}
+	defer rows.Close()
+
+	var roles permissions.Roles
+	for rows.Next() {
+		var r permissions.Role
+		if err := rows.Scan(&r.ID, &r.Name); err != nil {
+			return nil, fmt.Errorf("scan roles: %w", err)
+		}
+		roles = append(roles, r)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows roles: %w", rows.Err())
+	}
+
+	return roles, nil
+}
+
+func (pr *PermissionsRepo) GetTenantRoleMap(ctx context.Context, resources []string) (permissions.TenantRoleMap, error) {
+	pool, err := pr.tenantPool.GetTenantConnection(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get tenant connection: %w", err)
+	}
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin: %w", err)
+	}
+	defer rollback(ctx, tx)
+
+	roles, err := pr.getTenantRoles(ctx, tx)
+	if err != nil {
+		return nil, fmt.Errorf("get tenant role map: %w", err)
+	}
+
+	rolemap := permissions.TenantRoleMap{}
+
+	for _, role := range roles {
+		rolePermissions, err := pr.getRoleTenantPermissions(ctx, tx, role.ID, resources)
+		if err != nil {
+			return nil, fmt.Errorf("get role permissions: %w", err)
+		}
+
+		childRoles, err := pr.getChildRoles(ctx, tx, []string{role.ID})
+		if err != nil {
+			return nil, fmt.Errorf("get role permissions: %w", err)
+		}
+
+		rolemap[role] = permissions.TenantMappedRole{
+			Permissions: permissions.TenantPermissions(rolePermissions),
+			Inherits:    childRoles,
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("commit: %w", err)
+	}
+
+	return rolemap, nil
+}
+
+func (pr *PermissionsRepo) getRoleTenantPermissions(ctx context.Context, tx pgx.Tx, roleID string, resources []string) (permissions.TenantPermissions, error) {
+
+	rows, err := tx.Query(ctx, `
+		SELECT 
+			rp.permission_id, p.permission_name
+		FROM 
+			role_permissions rp
+		JOIN 
+			permissions p ON rp.permission_id = p.permission_id
+		WHERE 
+			rp.role_id = @role_id
+			AND
+			p.permission_name ILIKE ANY (@permission_names::text[])
+		ORDER BY
+			p.permission_name ASC
+		`, pgx.NamedArgs{
+		"role_id":          roleID,
+		"permission_names": permissionNamesForResources(resources),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("query role_permissions: %w", err)
+	}
+	defer rows.Close()
+
+	var tenantPermissions permissions.TenantPermissions
+	for rows.Next() {
+		var tp permissions.TenantPermission
+		if err := rows.Scan(&tp.ID, &tp.Name); err != nil {
+			return nil, fmt.Errorf("scan role_permissions: %w", err)
+		}
+		tenantPermissions = append(tenantPermissions, tp)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows role_permissions: %w", rows.Err())
+	}
+
+	return tenantPermissions, nil
 }
 
 func permissionNamesForResources(resources []string) []string {

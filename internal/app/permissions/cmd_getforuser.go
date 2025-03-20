@@ -9,23 +9,23 @@ import (
 )
 
 type ForUser struct {
-	Roles             Roles
-	TenantPermissions TenantPermissions
-	UserPermissions   UserPermissions
-	Resources         Resources
+	Roles       Roles
+	Permissions UserPermissions
+	Resources   Resources
+	RoleMap     TenantRoleMap
 }
 
 func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser, error) {
 
 	eg, ctxEg := errgroup.WithContext(ctx)
 
-	chTenantPermissions := make(chan TenantPermissions, 1)
+	chTenantRoleMap := make(chan TenantRoleMap, 1)
 	eg.Go(func() error {
-		tp, err := s.repo.GetTenantPermissions(ctxEg, resources)
+		trm, err := s.repo.GetTenantRoleMap(ctxEg, resources)
 		if err != nil {
 			return err
 		}
-		chTenantPermissions <- tp
+		chTenantRoleMap <- trm
 		return nil
 	})
 
@@ -75,7 +75,7 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 		return nil, fmt.Errorf("get for user: %w", err)
 	}
 
-	close(chTenantPermissions)
+	close(chTenantRoleMap)
 	close(chUserPermissions)
 	close(chUserExtraPermissions)
 	close(chUserRevokedPermissions)
@@ -102,9 +102,9 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	}
 
 	return &ForUser{
-		Resources:         <-chResources,
-		Roles:             <-chRoles,
-		TenantPermissions: <-chTenantPermissions,
-		UserPermissions:   up,
+		Resources:   <-chResources,
+		Roles:       <-chRoles,
+		Permissions: up,
+		RoleMap:     <-chTenantRoleMap,
 	}, nil
 }

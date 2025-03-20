@@ -9,6 +9,7 @@ import (
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
 	"github.com/Equineregister/user-permissions-service/pkg/config"
+	"github.com/Equineregister/user-permissions-service/pkg/rego"
 	"github.com/aws/aws-lambda-go/lambda"
 	"golang.org/x/exp/slog"
 )
@@ -22,12 +23,12 @@ type Request struct {
 
 // Response represents the output structure
 type Response struct {
-	TenantID          string     `json:"tenantId"`
-	UserID            string     `json:"userId"`
-	Roles             []string   `json:"roles"`
-	TenantPermissions []string   `json:"tenantPermissions"`
-	UserPermissions   []string   `json:"userPermissions"`
-	UserResources     []Resource `json:"userResources"`
+	TenantID        string         `json:"tenantId"`
+	UserID          string         `json:"userId"`
+	Roles           []string       `json:"roles"`
+	UserPermissions []string       `json:"userPermissions"`
+	UserResources   []Resource     `json:"userResources"`
+	RoleGraph       rego.RoleGraph `json:"roleGraph"`
 }
 
 type Resource struct {
@@ -63,9 +64,9 @@ func response(tenantID, userID string, forUser *permissions.ForUser) Response {
 	}
 	if forUser == nil {
 		resp.Roles = []string{}
-		resp.TenantPermissions = []string{}
 		resp.UserPermissions = []string{}
 		resp.UserResources = []Resource{}
+		resp.RoleGraph = rego.RoleGraph{}
 		return resp
 	}
 
@@ -78,8 +79,9 @@ func response(tenantID, userID string, forUser *permissions.ForUser) Response {
 	}
 
 	resp.Roles = forUser.Roles.StringSlice()
-	resp.TenantPermissions = forUser.TenantPermissions.StringSlice()
-	resp.UserPermissions = forUser.UserPermissions.StringSlice()
+	resp.UserPermissions = forUser.Permissions.StringSlice()
+	resp.RoleGraph = rego.NewRoleGraph(forUser.RoleMap)
+
 	return resp
 }
 
