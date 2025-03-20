@@ -20,45 +20,47 @@ const (
 )
 
 var expectedTenantPermissionsNoResources = permissions.TenantPermissions{
-	permissions.TenantPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-	permissions.TenantPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-	permissions.TenantPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-	permissions.TenantPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-	permissions.TenantPermission{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-	permissions.TenantPermission{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
-	permissions.TenantPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-	permissions.TenantPermission{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
+	{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+	{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
+	{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
+	{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+	{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
+	{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
+	{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+	{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 }
 
 var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 	userAdmin: {
 		TenantPermissions: expectedTenantPermissionsNoResources,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
+			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			permissions.UserPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			permissions.UserPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-			permissions.UserPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			permissions.UserPermission{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-			permissions.UserPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
+			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
+			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+			{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
+			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
 		},
 	},
 	userSalesManager: {
 		TenantPermissions: expectedTenantPermissionsNoResources,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			permissions.UserPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-			permissions.UserPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			permissions.UserPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-			permissions.UserPermission{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
+			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
+			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
+			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 		},
 		Resources: permissions.Resources{
-			permissions.Resource{ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c", Type: "products"},
+			{Type: "products", ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c"},
 		},
 	},
 	userSalesPerson: {
@@ -67,54 +69,55 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 			permissions.Role{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
 		},
 		Resources: permissions.Resources{
-			permissions.Resource{ID: "6b63b489-61cb-4087-8636-f10716bd724e", Type: "invoices"},
-			permissions.Resource{ID: "568104df-6ff3-40be-b660-91e3160aa7e6", Type: "invoices"},
+			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
+			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
 		},
 	},
 }
 
 var expectedTenantPermissionsProductsResource = permissions.TenantPermissions{
-	permissions.TenantPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-	permissions.TenantPermission{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-	permissions.TenantPermission{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
-	permissions.TenantPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-	permissions.TenantPermission{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
+	{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+	{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
+	{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
+	{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+	{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 }
 
 var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForUser{
 	userAdmin: {
 		TenantPermissions: expectedTenantPermissionsProductsResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
+			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			permissions.UserPermission{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-			permissions.UserPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+			{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
+			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
 		},
 		Resources: nil,
 	},
 	userSalesManager: {
 		TenantPermissions: expectedTenantPermissionsProductsResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			permissions.UserPermission{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-			permissions.UserPermission{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
+			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
+			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
+			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 		},
 		Resources: permissions.Resources{
-			permissions.Resource{ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c", Type: "products"},
+			{Type: "products", ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c"},
 		},
 	},
 	userSalesPerson: {
 		TenantPermissions: expectedTenantPermissionsProductsResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: nil,
 		Resources:       nil,
@@ -122,30 +125,32 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 }
 
 var expectedTenantPermissionsInvoicesResource = permissions.TenantPermissions{
-	permissions.TenantPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-	permissions.TenantPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-	permissions.TenantPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
+	{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+	{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
+	{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
 }
 
 var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForUser{
 	userAdmin: {
 		TenantPermissions: expectedTenantPermissionsInvoicesResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
+			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			permissions.UserPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			permissions.UserPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
+			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
+			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
 		},
 		Resources: nil,
 	},
 	userSalesManager: {
 		TenantPermissions: expectedTenantPermissionsInvoicesResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales manager", ID: "f47ac10b-58cc-4372-a567-0e02b2c3d479"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: permissions.UserPermissions{
+			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
 			permissions.UserPermission{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
 			permissions.UserPermission{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
 		},
@@ -154,14 +159,14 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 	userSalesPerson: {
 		TenantPermissions: expectedTenantPermissionsInvoicesResource,
 		Roles: permissions.Roles{
-			permissions.Role{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
+			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 		},
 		UserPermissions: permissions.UserPermissions{
-			permissions.UserPermission{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
+			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
 		},
 		Resources: permissions.Resources{
-			permissions.Resource{ID: "6b63b489-61cb-4087-8636-f10716bd724e", Type: "invoices"},
-			permissions.Resource{ID: "568104df-6ff3-40be-b660-91e3160aa7e6", Type: "invoices"},
+			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
+			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
 		},
 	},
 }

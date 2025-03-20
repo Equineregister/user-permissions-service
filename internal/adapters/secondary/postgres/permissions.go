@@ -102,7 +102,7 @@ func (pr *PermissionsRepo) GetUserPermissions(ctx context.Context, resources []s
 	}
 	defer rollback(ctx, tx)
 
-	// We must get the User's roles first, then get the permissions from those roles. -- TODO: Combine into one query??
+	// We must get the User's roles first, then get the permissions from those roles.
 	roles, err := pr.getUserRoles(ctx, tx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get user roles: %w", err)
@@ -349,6 +349,32 @@ func (pr *PermissionsRepo) GetUserRoles(ctx context.Context) (permissions.Roles,
 }
 
 func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
+	directRoles, err := pr.getDirectRoles(ctx, tx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("get direct roles: %w", err)
+	}
+	if len(directRoles) == 0 {
+		return nil, nil
+	}
+
+	var allChildRoles permissions.Roles
+	currentRoles := directRoles
+	for {
+		childRoles, err := pr.getChildRoles(ctx, tx, currentRoles.GetIDs())
+		if err != nil {
+			return nil, fmt.Errorf("get child roles: %w", err)
+		}
+		if len(childRoles) == 0 {
+			break
+		}
+		allChildRoles = append(allChildRoles, childRoles...)
+		currentRoles = childRoles
+	}
+	// Maintain the order of the roles, don't sort them.
+	return append(directRoles, allChildRoles...), nil
+}
+
+func (pr *PermissionsRepo) getDirectRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT 
 			ur.role_id, r.role_name
@@ -382,6 +408,43 @@ func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID s
 	}
 
 	return userRoles, nil
+}
+
+func (pr *PermissionsRepo) getChildRoles(ctx context.Context, tx pgx.Tx, assignedRoles []string) (permissions.Roles, error) {
+
+	rows, err := tx.Query(ctx, `
+		SELECT 
+			rh.child_role_id, r.role_name
+		FROM 
+			role_hierarchy rh
+		JOIN 
+			roles r ON rh.child_role_id = r.role_id
+		WHERE 
+			rh.parent_role_id = ANY(@assigned_roles)
+		ORDER BY
+			r.role_name ASC
+		`, pgx.NamedArgs{
+		"assigned_roles": assignedRoles,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("query role_hierarchy: %w", err)
+	}
+	defer rows.Close()
+
+	var childRoles permissions.Roles
+	for rows.Next() {
+		var ur permissions.Role
+		if err := rows.Scan(&ur.ID, &ur.Name); err != nil {
+			return nil, fmt.Errorf("scan user_roles: %w", err)
+		}
+		childRoles = append(childRoles, ur)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows user_roles: %w", rows.Err())
+	}
+
+	return childRoles, nil
 }
 
 func permissionNamesForResources(resources []string) []string {

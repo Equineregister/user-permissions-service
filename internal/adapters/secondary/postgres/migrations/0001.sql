@@ -3,6 +3,21 @@ CREATE TABLE roles (
     role_id UUID PRIMARY KEY,
     role_name TEXT NOT NULL
 );
+CREATE INDEX idx_roles_role_name ON roles (role_name);
+
+-- role_hierarchy is the hierarchy of roles.
+-- A role can have zero or more multiple child roles.
+-- A role can have zero or more parent roles.
+CREATE TABLE role_hierarchy (
+    parent_role_id UUID,
+    child_role_id UUID,
+    FOREIGN KEY (parent_role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    FOREIGN KEY (child_role_id) REFERENCES roles(role_id) ON DELETE CASCADE,
+    PRIMARY KEY (parent_role_id, child_role_id),
+    CONSTRAINT chk_parent_child_different CHECK (parent_role_id <> child_role_id)
+);
+CREATE INDEX idx_role_hierarchy_parent_role_id ON role_hierarchy (parent_role_id);
+CREATE INDEX idx_role_hierarchy_child_role_id ON role_hierarchy (child_role_id);
 
 -- permissions are the supported permissions.
 CREATE TABLE permissions (
@@ -18,7 +33,6 @@ CREATE TABLE tenant_permissions (
     updated_at TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
 );
-CREATE INDEX idx_tenant_permissions_permission_id ON tenant_permissions (permission_id);
 
 -- role_permissions are the permissions that are assigned to a Role.
 CREATE TABLE role_permissions (
@@ -38,7 +52,6 @@ CREATE TABLE resource_types (
     resource_type_id BIGINT PRIMARY KEY,
     resource_type_name TEXT NOT NULL UNIQUE
 );
-CREATE INDEX idx_resource_types_resource_type_name ON resource_types (resource_type_name);
 
 -- user_roles are the roles that are assigned to a User.
 CREATE TABLE user_roles (
