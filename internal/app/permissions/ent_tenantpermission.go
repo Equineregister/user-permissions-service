@@ -3,9 +3,9 @@ package permissions
 type TenantPermissions []TenantPermission
 
 func (tps TenantPermissions) StringSlice() []string {
-	var names []string
-	for _, tp := range tps {
-		names = append(names, tp.String())
+	names := make([]string, len(tps))
+	for i, tp := range tps {
+		names[i] = tp.String()
 	}
 	return names
 }

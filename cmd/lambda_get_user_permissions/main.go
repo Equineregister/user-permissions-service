@@ -53,22 +53,34 @@ func (h *handler) handle(ctx context.Context, request Request) (Response, error)
 		return Response{}, err
 	}
 
-	resources := make([]Resource, len(forUser.Resources))
+	return response(request.TenantID, request.UserID, forUser), nil
+}
+
+func response(tenantID, userID string, forUser *permissions.ForUser) Response {
+	resp := Response{
+		TenantID: tenantID,
+		UserID:   userID,
+	}
+	if forUser == nil {
+		resp.Roles = []string{}
+		resp.TenantPermissions = []string{}
+		resp.UserPermissions = []string{}
+		resp.UserResources = []Resource{}
+		return resp
+	}
+
+	resp.UserResources = make([]Resource, len(forUser.Resources))
 	for i, r := range forUser.Resources {
-		resources[i] = Resource{
+		resp.UserResources[i] = Resource{
 			ResourceID:   r.ID,
 			ResourceType: r.Type,
 		}
 	}
 
-	return Response{
-		TenantID:          request.TenantID,
-		UserID:            request.UserID,
-		Roles:             forUser.Roles.StringSlice(),
-		TenantPermissions: forUser.TenantPermissions.StringSlice(),
-		UserPermissions:   forUser.UserPermissions.StringSlice(),
-		UserResources:     resources,
-	}, nil
+	resp.Roles = forUser.Roles.StringSlice()
+	resp.TenantPermissions = forUser.TenantPermissions.StringSlice()
+	resp.UserPermissions = forUser.UserPermissions.StringSlice()
+	return resp
 }
 
 func main() {

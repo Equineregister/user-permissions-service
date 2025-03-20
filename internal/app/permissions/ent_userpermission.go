@@ -6,9 +6,9 @@ type UserRevokedPermissions UserPermissions
 type UserPermissions []UserPermission
 
 func (ups UserPermissions) StringSlice() []string {
-	var names []string
-	for _, up := range ups {
-		names = append(names, up.String())
+	names := make([]string, len(ups))
+	for i, up := range ups {
+		names[i] = up.String()
 	}
 	return names
 }
