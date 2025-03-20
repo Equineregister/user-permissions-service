@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
 	"github.com/Equineregister/user-permissions-service/internal/adapters/secondary/postgres"
@@ -11,7 +12,6 @@ import (
 	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/Equineregister/user-permissions-service/pkg/rego"
 	"github.com/aws/aws-lambda-go/lambda"
-	"golang.org/x/exp/slog"
 )
 
 // Request represents the input event structure
