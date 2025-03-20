@@ -16,7 +16,6 @@ CREATE TABLE tenant_permissions (
     permission_id UUID PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
-    cache_key TEXT,
     FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
 );
 CREATE INDEX idx_tenant_permissions_permission_id ON tenant_permissions (permission_id);
@@ -27,7 +26,6 @@ CREATE TABLE role_permissions (
     permission_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
-    cache_key TEXT,
     PRIMARY KEY (role_id, permission_id),
     FOREIGN KEY (role_id) REFERENCES roles(role_id),
     FOREIGN KEY (permission_id) REFERENCES permissions(permission_id)
@@ -49,7 +47,6 @@ CREATE TABLE user_roles (
     role_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
-    cache_key TEXT,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
@@ -77,7 +74,6 @@ CREATE TABLE user_resources (
     permission_id UUID  NOT NULL,           -- What permission the user has on this resource.
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE,
-    cache_key TEXT,
     FOREIGN KEY (permission_id) REFERENCES permissions(permission_id),
     FOREIGN KEY (resource_type_id) REFERENCES resource_types(resource_type_id)
 );

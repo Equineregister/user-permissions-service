@@ -16,7 +16,6 @@ import (
 
 const (
 	TestTenantID = "test_tenant"
-	//tenantData    = "/../../internal/adapters/secondary/postgres/tenants/test_tenant.sql"
 )
 
 func NewTestEnv(ctx context.Context, t *testing.T, appID string) (*permissions.Service, permissions.ReaderWriter) {
@@ -25,7 +24,7 @@ func NewTestEnv(ctx context.Context, t *testing.T, appID string) (*permissions.S
 	os.Setenv("LOG_LEVEL", "debug")
 	application.InitLogger()
 
-	db, err := testdatabase.NewTestDatabase(ctx, postgres.Migrations)
+	db, err := testdatabase.NewTestDatabase(ctx, postgres.Migrations, postgres.Tenants)
 	if err != nil {
 		t.Fatalf("failed to create new test database: %s", err.Error())
 	}

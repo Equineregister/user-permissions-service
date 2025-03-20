@@ -27,7 +27,7 @@ type TestDatabase struct {
 	container testcontainers.Container
 }
 
-func NewTestDatabase(ctx context.Context, migrationsFS fs.FS) (*TestDatabase, error) {
+func NewTestDatabase(ctx context.Context, migrationsFS fs.FS, tenantsFS fs.FS) (*TestDatabase, error) {
 	// setup db container
 	container, dbConn, err := createContainer(ctx)
 	if err != nil {
@@ -37,6 +37,13 @@ func NewTestDatabase(ctx context.Context, migrationsFS fs.FS) (*TestDatabase, er
 	// migrate db schema
 	if err := migrations.Migrate(ctx, dbConn, migrationsFS); err != nil {
 		return nil, fmt.Errorf("migrate fs: %w", err)
+	}
+
+	// load test data, if any
+	if tenantsFS != nil {
+		if err := migrations.LoadTestTenantData(ctx, dbConn, tenantsFS); err != nil {
+			return nil, fmt.Errorf("load test data: %w", err)
+		}
 	}
 
 	return &TestDatabase{

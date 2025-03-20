@@ -3,6 +3,7 @@ package permissions
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -91,11 +92,10 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	up = append(up, extra...)
 
 	// Remove revoked permissions. Do this after adding the extra permissions to ensure that the revoked permissions are removed.
-
 	for _, r := range revoked {
 		for i, p := range up {
 			if p.ID == r.ID {
-				up = append(up[:i], up[i+1:]...)
+				up = slices.Delete(up, i, i+1)
 				break
 			}
 		}

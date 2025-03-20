@@ -28,7 +28,11 @@ const insertMigration = `
 	INSERT INTO _migrations (file_name) VALUES ($1);
 `
 
-const migrationsDir = "migrations"
+const (
+	migrationsDir      = "migrations"
+	tenantsDir         = "migrations/tenants"
+	testTenantFilename = "test_tenant.sql"
+)
 
 func Migrate(ctx context.Context, db *pgxpool.Pool, fsys fs.FS) error {
 	tx, err := db.Begin(ctx)
@@ -126,4 +130,38 @@ func filterFiles(files []fs.DirEntry) []fs.DirEntry {
 		filteredFiles = append(filteredFiles, file)
 	}
 	return filteredFiles
+}
+
+func LoadTestTenantData(ctx context.Context, db *pgxpool.Pool, fsys fs.FS) error {
+	tx, err := db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			slog.Error("rollback tx", "error", err.Error())
+		}
+	}()
+
+	bytes, err := fs.ReadFile(fsys, fmt.Sprintf("%s/%s", tenantsDir, testTenantFilename))
+	if err != nil {
+		return fmt.Errorf("read tenants file (%s): %w", testTenantFilename, err)
+	}
+	query := string(bytes)
+	if len(strings.TrimSpace(query)) == 0 {
+		return fmt.Errorf("empty query in file: %s", testTenantFilename)
+	}
+
+	_, err = tx.Exec(ctx, query)
+	if err != nil {
+		return fmt.Errorf("exec query for file: %s caused: %w", testTenantFilename, err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return fmt.Errorf("commit tx: %w", err)
+	}
+
+	return nil
 }

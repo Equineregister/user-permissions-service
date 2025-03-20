@@ -167,6 +167,8 @@ func (pr *PermissionsRepo) getUserPermissionsFromRoles(ctx context.Context, tx p
 			role_id = ANY(@role_ids)
 			AND
 			p.permission_name ILIKE ANY (@permission_names::text[])
+		ORDER BY
+        	p.permission_name ASC
 		`, pgx.NamedArgs{
 		"role_ids":         userRoles.GetIDs(),
 		"permission_names": permissionNamesForResources(resources),
@@ -208,6 +210,8 @@ func (pr *PermissionsRepo) getUserPermissionsExtraAndRevoked(ctx context.Context
 				up.user_id = @user_id
 				AND
 				p.permission_name ILIKE ANY (@permission_names::text[])
+			ORDER BY
+        		p.permission_name ASC
 		`, pgx.NamedArgs{
 		"user_id":          userID,
 		"permission_names": permissionNamesForResources(resources),
@@ -273,17 +277,23 @@ func (pr *PermissionsRepo) GetUserResources(ctx context.Context, resources []str
 }
 
 func (pr *PermissionsRepo) getUserResources(ctx context.Context, tx pgx.Tx, userID string, resources []string) (permissions.Resources, error) {
+	if len(resources) == 0 {
+		resources = []string{"%"} // Match everything
+	}
+
 	rows, err := tx.Query(ctx, `
 		SELECT 
-			ur.resource_id, rt.resource_type_name
+			ur.resource_id, ur.resource_type_id, rt.resource_type_name
 		FROM 
 			user_resources ur
 		JOIN 
 			resource_types rt ON ur.resource_type_id = rt.resource_type_id
 		WHERE 
 			ur.user_id = @user_id
-		AND
+			AND
 			rt.resource_type_name ILIKE ANY(@resource_types::text[])
+		ORDER BY
+        	rt.resource_type_name ASC
 		`, pgx.NamedArgs{
 		"user_id":        userID,
 		"resource_types": resources,
@@ -296,7 +306,8 @@ func (pr *PermissionsRepo) getUserResources(ctx context.Context, tx pgx.Tx, user
 	var userResources permissions.Resources
 	for rows.Next() {
 		var ur permissions.Resource
-		if err := rows.Scan(&ur.ID, &ur.Type); err != nil {
+		var resourceTypeID int
+		if err := rows.Scan(&ur.ID, &resourceTypeID, &ur.Type); err != nil {
 			return nil, fmt.Errorf("scan user_resources: %w", err)
 		}
 		userResources = append(userResources, ur)
@@ -340,13 +351,15 @@ func (pr *PermissionsRepo) GetUserRoles(ctx context.Context) (permissions.Roles,
 func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID string) (permissions.Roles, error) {
 	rows, err := tx.Query(ctx, `
 		SELECT 
-			ur.role_id, r.role_name, ur.cache_key
+			ur.role_id, r.role_name
 		FROM 
 			user_roles ur
 		JOIN 
 			roles r ON ur.role_id = r.role_id
 		WHERE 
 			ur.user_id = @user_id
+		ORDER BY
+			r.role_name ASC
 		`, pgx.NamedArgs{
 		"user_id": userID,
 	})
@@ -358,7 +371,7 @@ func (pr *PermissionsRepo) getUserRoles(ctx context.Context, tx pgx.Tx, userID s
 	var userRoles permissions.Roles
 	for rows.Next() {
 		var ur permissions.Role
-		if err := rows.Scan(&ur.ID, &ur.Name, &ur.CacheKey); err != nil {
+		if err := rows.Scan(&ur.ID, &ur.Name); err != nil {
 			return nil, fmt.Errorf("scan user_roles: %w", err)
 		}
 		userRoles = append(userRoles, ur)

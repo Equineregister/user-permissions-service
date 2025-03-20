@@ -19,9 +19,8 @@ func (r Roles) StringSlice() []string {
 }
 
 type Role struct {
-	ID       string
-	Name     string
-	CacheKey string
+	ID   string
+	Name string
 }
 
 func (r Role) String() string {

@@ -1,71 +1,69 @@
 -- Insert test data into roles
 INSERT INTO roles (role_id, role_name) VALUES
-    ('11111111-1111-1111-1111-111111111111', 'admin'),
-    ('22222222-2222-2222-2222-222222222222', 'sales person'),
-    ('33333333-3333-3333-3333-333333333333', 'sales manager');
+    ('550e8400-e29b-41d4-a716-446655440000', 'admin'),
+    ('123e4567-e89b-12d3-a456-426614174000', 'sales person'),
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'sales manager');
 
 -- Insert test data into permissions
 INSERT INTO permissions (permission_id, permission_name) VALUES
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'invoices:create'),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'invoices:read'),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'invoices:delete'),
-    ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'products:create'),
-    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'products:read'),
-    ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'products:delete'),
-    ('gggggggg-gggg-gggg-gggg-gggggggggggg', 'products:update'),
-    ('hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh', 'products:disable');
-
+    ('2f9606d8-4bff-46e7-bd8f-ae9e476d3995', 'invoices:create'),
+    ('8f20eca6-9859-4532-babb-65a528e1611e', 'invoices:read'),
+    ('41c21275-b7d5-4031-b551-b5e293b85319', 'invoices:delete'),
+    ('df6ae9bc-e957-41c1-a683-3773667c7628', 'products:create'),
+    ('62752f21-fbe2-4301-a72d-7dc8963e08e2', 'products:read'),
+    ('acecdadf-f527-45bf-8123-353b7ee8dc6a', 'products:delete'),
+    ('e12d692b-3a96-43aa-a966-dd3add99d312', 'products:update'),
+    ('cf7dc325-6bc9-44f5-aafb-fcdc694b111d', 'products:disable');
 
 -- Insert test data into tenant_permissions
 INSERT INTO tenant_permissions (permission_id, created_at) VALUES
-    -- The Tenant has all permissions.
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', NOW()),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NOW()),
-    ('cccccccc-cccc-cccc-cccc-cccccccccccc', NOW()),
-    ('dddddddd-dddd-dddd-dddd-dddddddddddd', NOW()),
-    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', NOW()),
-    ('ffffffff-ffff-ffff-ffff-ffffffffffff', NOW()),
-    ('gggggggg-gggg-gggg-gggg-gggggggggggg', NOW()),
-    ('hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh', NOW());
+    ('2f9606d8-4bff-46e7-bd8f-ae9e476d3995', NOW()),
+    ('8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
+    ('41c21275-b7d5-4031-b551-b5e293b85319', NOW()),
+    ('df6ae9bc-e957-41c1-a683-3773667c7628', NOW()),
+    ('62752f21-fbe2-4301-a72d-7dc8963e08e2', NOW()),
+    ('acecdadf-f527-45bf-8123-353b7ee8dc6a', NOW()),
+    ('e12d692b-3a96-43aa-a966-dd3add99d312', NOW()),
+    ('cf7dc325-6bc9-44f5-aafb-fcdc694b111d', NOW());
 
 -- Insert test data into role_permissions
 INSERT INTO role_permissions (role_id, permission_id, created_at) VALUES
     -- The Admin role can do everything.
-    ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', NOW()),
-    ('11111111-1111-1111-1111-111111111111', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NOW()),
-    ('11111111-1111-1111-1111-111111111111', 'cccccccc-cccc-cccc-cccc-cccccccccccc', NOW()),
-    ('11111111-1111-1111-1111-111111111111', 'dddddddd-dddd-dddd-dddd-dddddddddddd', NOW()),
-    ('11111111-1111-1111-1111-111111111111', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', NOW()),
-    ('11111111-1111-1111-1111-111111111111', 'ffffffff-ffff-ffff-ffff-ffffffffffff', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', '2f9606d8-4bff-46e7-bd8f-ae9e476d3995', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', '8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', '41c21275-b7d5-4031-b551-b5e293b85319', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', 'df6ae9bc-e957-41c1-a683-3773667c7628', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', '62752f21-fbe2-4301-a72d-7dc8963e08e2', NOW()),
+    ('550e8400-e29b-41d4-a716-446655440000', 'acecdadf-f527-45bf-8123-353b7ee8dc6a', NOW()),
     -- The Sales Person can create invoices.
-    ('22222222-2222-2222-2222-222222222222', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', NOW()),
+    ('123e4567-e89b-12d3-a456-426614174000', '2f9606d8-4bff-46e7-bd8f-ae9e476d3995', NOW()),
     -- The Sales Manager can read and delete invoices and create, read and disable products.
-    ('33333333-3333-3333-3333-333333333333', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NOW()),
-    ('33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-cccccccccccc', NOW()),
-    ('33333333-3333-3333-3333-333333333333', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', NOW()),
-    ('33333333-3333-3333-3333-333333333333', 'dddddddd-dddd-dddd-dddd-dddddddddddd', NOW()),
-    ('33333333-3333-3333-3333-333333333333', 'hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh', NOW());
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '41c21275-b7d5-4031-b551-b5e293b85319', NOW()),
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '62752f21-fbe2-4301-a72d-7dc8963e08e2', NOW()),
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'df6ae9bc-e957-41c1-a683-3773667c7628', NOW()),
+    ('f47ac10b-58cc-4372-a567-0e02b2c3d479', 'cf7dc325-6bc9-44f5-aafb-fcdc694b111d', NOW());
     
 -- Insert test data into resource_types
 INSERT INTO resource_types (resource_type_id, resource_type_name) VALUES
-    (1, 'invoice'),
-    (2, 'product');
+    (1, 'invoices'),
+    (2, 'products');
 
 -- Insert test data into user_roles
 INSERT INTO user_roles (user_id, role_id, created_at) VALUES
-    ('032fb302-4aee-4a68-b426-0c6faf12081e', '11111111-1111-1111-1111-111111111111', NOW()), -- A User with the Admin role.
-    ('2133479c-35a8-4a49-a682-2952d4772ecc', '22222222-2222-2222-2222-222222222222', NOW()), -- A User with the Sales Person role.
-    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', '33333333-3333-3333-3333-333333333333', NOW()); -- A User with the Sales Manager Role.
+    ('032fb302-4aee-4a68-b426-0c6faf12081e', '550e8400-e29b-41d4-a716-446655440000', NOW()),
+    ('2133479c-35a8-4a49-a682-2952d4772ecc', '123e4567-e89b-12d3-a456-426614174000', NOW()),
+    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 'f47ac10b-58cc-4372-a567-0e02b2c3d479', NOW());
 
 -- Insert test data into user_resources
 INSERT INTO user_resources (user_id, resource_type_id, resource_id, permission_id, created_at) VALUES
-    ('2133479c-35a8-4a49-a682-2952d4772ecc', 1, '2f9606d8-4bff-46e7-bd8f-ae9e476d3995', 'cccccccc-cccc-cccc-cccc-cccccccccccc', NOW()), -- The Sales Person can delete this Invoice.
-    ('2133479c-35a8-4a49-a682-2952d4772ecc', 1, '568104df-6ff3-40be-b660-91e3160aa7e6', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', NOW()), -- The Sales Person can read this Invoice.
-    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 2, '75248bd5-73a2-4507-9ab3-5418abd33a3c', 'ffffffff-ffff-ffff-ffff-ffffffffffff', NOW()); -- The Sales Manager can delete this Product.
+    ('2133479c-35a8-4a49-a682-2952d4772ecc', 1, '6b63b489-61cb-4087-8636-f10716bd724e', '41c21275-b7d5-4031-b551-b5e293b85319', NOW()),
+    ('2133479c-35a8-4a49-a682-2952d4772ecc', 1, '568104df-6ff3-40be-b660-91e3160aa7e6', '8f20eca6-9859-4532-babb-65a528e1611e', NOW()),
+    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 2, '75248bd5-73a2-4507-9ab3-5418abd33a3c', 'acecdadf-f527-45bf-8123-353b7ee8dc6a', NOW());
 
 -- Insert test data into user_permissions
 INSERT INTO user_permissions (user_id, permission_id, permission_type, created_at) VALUES
     -- The Sales Manager has an extra permission for products:update
-    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 'gggggggg-gggg-gggg-gggg-gggggggggggg', 'extra', NOW()),
+    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 'e12d692b-3a96-43aa-a966-dd3add99d312', 'extra', NOW()),
     -- The Sales Manager has a revoked permission for products:disable
-    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 'hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh', 'revoked', NOW());
+    ('652f4d18-dd3d-40c0-874e-cbe3566abccf', 'cf7dc325-6bc9-44f5-aafb-fcdc694b111d', 'revoked', NOW());
