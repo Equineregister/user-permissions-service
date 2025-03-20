@@ -125,6 +125,11 @@ func Test_response(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := response(tt.args.tenantID, tt.args.userID, tt.args.forUser)
 			assert.Equal(t, tt.want, got)
+			/*
+				resp, err := json.Marshal(got)
+				require.NoError(t, err)
+				t.Log(string(resp))
+			*/
 		})
 	}
 }
