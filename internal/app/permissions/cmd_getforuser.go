@@ -3,28 +3,29 @@ package permissions
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"golang.org/x/sync/errgroup"
 )
 
 type ForUser struct {
-	Roles             Roles
-	TenantPermissions TenantPermissions
-	UserPermissions   UserPermissions
-	Resources         Resources
+	Roles       Roles
+	Permissions UserPermissions
+	Resources   Resources
+	RoleMap     TenantRoleMap
 }
 
 func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser, error) {
 
 	eg, ctxEg := errgroup.WithContext(ctx)
 
-	chTenantPermissions := make(chan TenantPermissions, 1)
+	chTenantRoleMap := make(chan TenantRoleMap, 1)
 	eg.Go(func() error {
-		tp, err := s.repo.GetTenantPermissions(ctxEg, resources)
+		trm, err := s.repo.GetTenantRoleMap(ctxEg, resources)
 		if err != nil {
 			return err
 		}
-		chTenantPermissions <- tp
+		chTenantRoleMap <- trm
 		return nil
 	})
 
@@ -73,11 +74,13 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	if err := eg.Wait(); err != nil {
 		return nil, fmt.Errorf("get for user: %w", err)
 	}
-	close(chTenantPermissions)
+
+	close(chTenantRoleMap)
 	close(chUserPermissions)
 	close(chUserExtraPermissions)
 	close(chUserRevokedPermissions)
 	close(chRoles)
+	close(chResources)
 
 	// Combine the user permissions with the extra permissions and remove the revoked permissions
 	// This is done in the service layer to keep the repository layer simple.
@@ -92,16 +95,16 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	for _, r := range revoked {
 		for i, p := range up {
 			if p.ID == r.ID {
-				up = append(up[:i], up[i+1:]...)
+				up = slices.Delete(up, i, i+1)
 				break
 			}
 		}
 	}
 
 	return &ForUser{
-		Resources:         <-chResources,
-		Roles:             <-chRoles,
-		TenantPermissions: <-chTenantPermissions,
-		UserPermissions:   up,
+		Resources:   <-chResources,
+		Roles:       <-chRoles,
+		Permissions: up,
+		RoleMap:     <-chTenantRoleMap,
 	}, nil
 }

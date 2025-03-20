@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
-	"github.com/Equineregister/user-permissions-service/internal/adapter/secondary/postgres"
+	"github.com/Equineregister/user-permissions-service/internal/adapters/secondary/postgres"
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
 	"github.com/Equineregister/user-permissions-service/pkg/config"
+	"github.com/Equineregister/user-permissions-service/pkg/rego"
 	"github.com/aws/aws-lambda-go/lambda"
-	"golang.org/x/exp/slog"
 )
 
 // Request represents the input event structure
@@ -22,12 +23,12 @@ type Request struct {
 
 // Response represents the output structure
 type Response struct {
-	TenantID          string     `json:"tenantId"`
-	UserID            string     `json:"userId"`
-	Roles             []string   `json:"roles"`
-	TenantPermissions []string   `json:"tenantPermissions"`
-	UserPermissions   []string   `json:"userPermissions"`
-	UserResources     []Resource `json:"userResources"`
+	TenantID        string         `json:"tenantId"`
+	UserID          string         `json:"userId"`
+	Roles           []string       `json:"roles"`
+	UserPermissions []string       `json:"userPermissions"`
+	UserResources   []Resource     `json:"userResources"`
+	RoleGraph       rego.RoleGraph `json:"roleGraph"`
 }
 
 type Resource struct {
@@ -53,22 +54,35 @@ func (h *handler) handle(ctx context.Context, request Request) (Response, error)
 		return Response{}, err
 	}
 
-	resources := make([]Resource, len(forUser.Resources))
+	return response(request.TenantID, request.UserID, forUser), nil
+}
+
+func response(tenantID, userID string, forUser *permissions.ForUser) Response {
+	resp := Response{
+		TenantID: tenantID,
+		UserID:   userID,
+	}
+	if forUser == nil {
+		resp.Roles = []string{}
+		resp.UserPermissions = []string{}
+		resp.UserResources = []Resource{}
+		resp.RoleGraph = rego.RoleGraph{}
+		return resp
+	}
+
+	resp.UserResources = make([]Resource, len(forUser.Resources))
 	for i, r := range forUser.Resources {
-		resources[i] = Resource{
+		resp.UserResources[i] = Resource{
 			ResourceID:   r.ID,
 			ResourceType: r.Type,
 		}
 	}
 
-	return Response{
-		TenantID:          request.TenantID,
-		UserID:            request.UserID,
-		Roles:             forUser.Roles.StringSlice(),
-		TenantPermissions: forUser.TenantPermissions.StringSlice(),
-		UserPermissions:   forUser.UserPermissions.StringSlice(),
-		UserResources:     resources,
-	}, nil
+	resp.Roles = forUser.Roles.StringSlice()
+	resp.UserPermissions = forUser.Permissions.StringSlice()
+	resp.RoleGraph = rego.NewRoleGraph(forUser.RoleMap)
+
+	return resp
 }
 
 func main() {

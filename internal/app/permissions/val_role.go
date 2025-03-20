@@ -11,17 +11,16 @@ func (r Roles) GetIDs() []string {
 }
 
 func (r Roles) StringSlice() []string {
-	var names []string
-	for _, role := range r {
-		names = append(names, role.Name)
+	names := make([]string, len(r))
+	for i, role := range r {
+		names[i] = role.Name
 	}
 	return names
 }
 
 type Role struct {
-	ID       string
-	Name     string
-	CacheKey string
+	ID   string
+	Name string
 }
 
 func (r Role) String() string {

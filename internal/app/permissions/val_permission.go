@@ -1,5 +1,6 @@
 package permissions
 
+type Permissions []Permission
 type Permission struct {
 	Name string
 	ID   string
