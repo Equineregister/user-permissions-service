@@ -30,8 +30,8 @@ const insertMigration = `
 
 const (
 	migrationsDir      = "migrations"
-	tenantsDir         = "migrations/tenants"
-	testTenantFilename = "test_tenant.sql"
+	tenantsDir         = "migrations/tenants/test"
+	testTenantFilename = "0001-foundation.sql"
 )
 
 func Migrate(ctx context.Context, db *pgxpool.Pool, fsys fs.FS) error {

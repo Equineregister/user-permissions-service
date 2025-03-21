@@ -1,0 +1,1 @@
+DROP ROLE IF EXISTS userperms_service_user;
