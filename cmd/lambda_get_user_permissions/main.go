@@ -23,12 +23,13 @@ type Request struct {
 
 // Response represents the output structure
 type Response struct {
-	TenantID        string         `json:"tenantId"`
-	UserID          string         `json:"userId"`
-	Roles           []string       `json:"roles"`
-	UserPermissions []string       `json:"userPermissions"`
-	UserResources   []Resource     `json:"userResources"`
-	RoleGraph       rego.RoleGraph `json:"roleGraph"`
+	TenantID           string         `json:"tenantId"`
+	UserID             string         `json:"userId"`
+	Roles              []string       `json:"roles"`
+	RevokedPermissions []string       `json:"revokedPermissions"`
+	ExtraPermissions   []string       `json:"extraPermissions"`
+	UserResources      []Resource     `json:"userResources"`
+	RoleGraph          rego.RoleGraph `json:"roleGraph"`
 }
 
 type Resource struct {
@@ -64,7 +65,8 @@ func response(tenantID, userID string, forUser *permissions.ForUser) Response {
 	}
 	if forUser == nil {
 		resp.Roles = []string{}
-		resp.UserPermissions = []string{}
+		resp.ExtraPermissions = []string{}
+		resp.RevokedPermissions = []string{}
 		resp.UserResources = []Resource{}
 		resp.RoleGraph = rego.RoleGraph{}
 		return resp
@@ -79,7 +81,8 @@ func response(tenantID, userID string, forUser *permissions.ForUser) Response {
 	}
 
 	resp.Roles = forUser.Roles.StringSlice()
-	resp.UserPermissions = forUser.Permissions.StringSlice()
+	resp.RevokedPermissions = forUser.RevokedPermissions.StringSlice()
+	resp.ExtraPermissions = forUser.ExtraPermissions.StringSlice()
 	resp.RoleGraph = rego.NewRoleGraph(forUser.RoleMap)
 
 	return resp
