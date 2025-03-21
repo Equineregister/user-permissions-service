@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Equineregister/user-permissions-service/internal/config"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
-	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
 	"github.com/jackc/pgx/v5"
@@ -37,10 +37,8 @@ func (tp *TenantPool) GetTenantConnection(ctx context.Context) (*pgxpool.Pool, e
 	}
 	tp.mu.RUnlock()
 
-	awsConfig := tp.cfg.GetAWSConfig()
-
 	dsn := fmt.Sprintf("user=%s host=%s port=%d dbname=%s", "root", tp.host, tp.port, tenantID)
-	pool, err := NewWithIAM(ctx, &awsConfig, dsn)
+	pool, err := NewWithIAM(ctx, tp.cfg.AWSConfig, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("new with iam: %w", err)
 	}

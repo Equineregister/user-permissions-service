@@ -9,7 +9,6 @@ import (
 
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
-	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -242,7 +241,7 @@ func TestGetForUser_LambdaGetUserPermissions(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, contextkey.CtxKeyTenantID, TestTenantID)
 
-	svc, _ := NewTestEnv(ctx, t, config.LambdaGetUserPermissions)
+	svc, _ := NewTestEnv(ctx, t)
 
 	t.Run("No resources in request", func(t *testing.T) {
 
