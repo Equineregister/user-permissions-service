@@ -9,4 +9,4 @@ import "embed"
 var Migrations embed.FS
 
 //go:embed "all:migrations/tenants/test"
-var Tenants embed.FS
+var TestTenant embed.FS
