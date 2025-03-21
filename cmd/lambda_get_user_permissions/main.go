@@ -7,9 +7,9 @@ import (
 
 	"github.com/Equineregister/user-permissions-service/internal/adapters/secondary/postgres"
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
+	"github.com/Equineregister/user-permissions-service/internal/config"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/application"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
-	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/Equineregister/user-permissions-service/pkg/rego"
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -93,9 +93,9 @@ func main() {
 
 	ctx := context.Background()
 
-	cfg := config.New()
-	if err := cfg.Load(ctx, config.LambdaGetUserPermissions); err != nil {
-		slog.Error("Error loading config", "error", err.Error())
+	cfg, err := config.Load(ctx)
+	if err != nil {
+		slog.Error("failed to load config", "error", err)
 		os.Exit(1)
 	}
 

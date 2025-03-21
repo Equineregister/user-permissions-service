@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/Equineregister/user-permissions-service/internal/app/permissions"
+	"github.com/Equineregister/user-permissions-service/internal/config"
 	"github.com/Equineregister/user-permissions-service/internal/pkg/contextkey"
-	"github.com/Equineregister/user-permissions-service/pkg/config"
 	"github.com/jackc/pgx/v5"
 )
 

@@ -8,5 +8,5 @@ import "embed"
 //go:embed "all:migrations"
 var Migrations embed.FS
 
-//go:embed "all:migrations/tenants"
+//go:embed "all:migrations/tenants/test"
 var Tenants embed.FS

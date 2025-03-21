@@ -18,7 +18,7 @@ const (
 	TestTenantID = "test_tenant"
 )
 
-func NewTestEnv(ctx context.Context, t *testing.T, appID string) (*permissions.Service, permissions.ReaderWriter) {
+func NewTestEnv(ctx context.Context, t *testing.T) (*permissions.Service, permissions.ReaderWriter) {
 	t.Helper()
 
 	os.Setenv("LOG_LEVEL", "debug")
