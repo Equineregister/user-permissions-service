@@ -90,8 +90,8 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		Resources: permissions.Resources{
-			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
+			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 		},
 		RevokedPermissions: permissions.UserRevokedPermissions{},
 		ExtraPermissions:   permissions.UserExtraPermissions{},
@@ -229,15 +229,15 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
 		Resources: permissions.Resources{
-			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
+			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 		},
 		RevokedPermissions: permissions.UserRevokedPermissions{},
 		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 }
 
-func TestGetForUser_LambdaGetUserPermissions(t *testing.T) {
+func TestGetForUser(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, contextkey.CtxKeyTenantID, TestTenantID)
 

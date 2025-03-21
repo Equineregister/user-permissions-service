@@ -293,7 +293,7 @@ func (pr *PermissionsRepo) getUserResources(ctx context.Context, tx pgx.Tx, user
 			AND
 			rt.resource_type_name ILIKE ANY(@resource_types::text[])
 		ORDER BY
-        	rt.resource_type_name ASC
+        	rt.resource_type_name ASC, ur.resource_id ASC
 		`, pgx.NamedArgs{
 		"user_id":        userID,
 		"resource_types": resources,

@@ -99,6 +99,10 @@ func Migrate(ctx context.Context, db *pgxpool.Pool, fsys fs.FS) error {
 			return fmt.Errorf("empty query in file: %s", file.Name())
 		}
 
+		if strings.HasPrefix(string(bytes), "-- SKIP_WHEN_TESTING") {
+			continue
+		}
+
 		_, err = tx.Exec(ctx, query)
 		if err != nil {
 			return fmt.Errorf("exec query for file: %s caused: %w", file.Name(), err)
