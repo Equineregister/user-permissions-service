@@ -3,16 +3,16 @@ package permissions
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	"golang.org/x/sync/errgroup"
 )
 
 type ForUser struct {
-	Roles       Roles
-	Permissions UserPermissions
-	Resources   Resources
-	RoleMap     TenantRoleMap
+	Roles              Roles
+	RevokedPermissions UserRevokedPermissions
+	ExtraPermissions   UserExtraPermissions
+	Resources          Resources
+	RoleMap            TenantRoleMap
 }
 
 func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser, error) {
@@ -26,16 +26,6 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 			return err
 		}
 		chTenantRoleMap <- trm
-		return nil
-	})
-
-	chUserPermissions := make(chan UserPermissions, 1)
-	eg.Go(func() error {
-		up, err := s.repo.GetUserPermissions(ctxEg, resources)
-		if err != nil {
-			return err
-		}
-		chUserPermissions <- up
 		return nil
 	})
 
@@ -76,35 +66,16 @@ func (s *Service) GetForUser(ctx context.Context, resources []string) (*ForUser,
 	}
 
 	close(chTenantRoleMap)
-	close(chUserPermissions)
 	close(chUserExtraPermissions)
 	close(chUserRevokedPermissions)
 	close(chRoles)
 	close(chResources)
 
-	// Combine the user permissions with the extra permissions and remove the revoked permissions
-	// This is done in the service layer to keep the repository layer simple.
-	up := <-chUserPermissions
-	extra := <-chUserExtraPermissions
-	revoked := <-chUserRevokedPermissions
-
-	// Add extra permissions
-	up = append(up, extra...)
-
-	// Remove revoked permissions. Do this after adding the extra permissions to ensure that the revoked permissions are removed.
-	for _, r := range revoked {
-		for i, p := range up {
-			if p.ID == r.ID {
-				up = slices.Delete(up, i, i+1)
-				break
-			}
-		}
-	}
-
 	return &ForUser{
-		Resources:   <-chResources,
-		Roles:       <-chRoles,
-		Permissions: up,
-		RoleMap:     <-chTenantRoleMap,
+		ExtraPermissions:   <-chUserExtraPermissions,
+		RevokedPermissions: <-chUserRevokedPermissions,
+		Resources:          <-chResources,
+		Roles:              <-chRoles,
+		RoleMap:            <-chTenantRoleMap,
 	}, nil
 }

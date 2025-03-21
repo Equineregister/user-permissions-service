@@ -1,7 +1,16 @@
 package permissions
 
 type UserExtraPermissions UserPermissions
+
+func (ueps UserExtraPermissions) StringSlice() []string {
+	return UserPermissions(ueps).StringSlice()
+}
+
 type UserRevokedPermissions UserPermissions
+
+func (urps UserRevokedPermissions) StringSlice() []string {
+	return UserPermissions(urps).StringSlice()
+}
 
 type UserPermissions []UserPermission
 

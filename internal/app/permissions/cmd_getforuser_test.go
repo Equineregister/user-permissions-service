@@ -64,14 +64,8 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 		Roles: permissions.Roles{
 			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-		},
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 	userSalesManager: {
 		RoleMap: expectedTenantRoleMapNoResources,
@@ -80,16 +74,14 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
-		},
 		Resources: permissions.Resources{
 			{Type: "products", ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c"},
+		},
+		RevokedPermissions: permissions.UserRevokedPermissions{
+			{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
+		},
+		ExtraPermissions: permissions.UserExtraPermissions{
+			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 		},
 	},
 	userSalesPerson: {
@@ -98,14 +90,12 @@ var testExpectations_NoResourcesInRequest = map[string]permissions.ForUser{
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-		},
 		Resources: permissions.Resources{
 			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
 		},
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 }
 
@@ -146,12 +136,9 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 		Roles: permissions.Roles{
 			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			{Name: "products:delete", ID: "acecdadf-f527-45bf-8123-353b7ee8dc6a"},
-			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-		},
-		Resources: nil,
+		Resources:          nil,
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 	userSalesManager: {
 		RoleMap: expectedTenantRoleMapProductsResource,
@@ -160,13 +147,14 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "products:create", ID: "df6ae9bc-e957-41c1-a683-3773667c7628"},
-			{Name: "products:read", ID: "62752f21-fbe2-4301-a72d-7dc8963e08e2"},
-			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
-		},
 		Resources: permissions.Resources{
 			{Type: "products", ID: "75248bd5-73a2-4507-9ab3-5418abd33a3c"},
+		},
+		RevokedPermissions: permissions.UserRevokedPermissions{
+			{Name: "products:disable", ID: "cf7dc325-6bc9-44f5-aafb-fcdc694b111d"},
+		},
+		ExtraPermissions: permissions.UserExtraPermissions{
+			{Name: "products:update", ID: "e12d692b-3a96-43aa-a966-dd3add99d312"},
 		},
 	},
 	userSalesPerson: {
@@ -175,8 +163,9 @@ var testExpectations_WithProductsResourceInRequest = map[string]permissions.ForU
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: nil,
-		Resources:   nil,
+		Resources:          nil,
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 }
 
@@ -219,12 +208,9 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 		Roles: permissions.Roles{
 			{Name: "admin", ID: "550e8400-e29b-41d4-a716-446655440000"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-		},
-		Resources: nil,
+		Resources:          nil,
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 	userSalesManager: {
 		RoleMap: expectedTenantRoleMapInvoicesResource,
@@ -233,12 +219,9 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:delete", ID: "41c21275-b7d5-4031-b551-b5e293b85319"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-		},
-		Resources: nil,
+		Resources:          nil,
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 	userSalesPerson: {
 		RoleMap: expectedTenantRoleMapInvoicesResource,
@@ -246,14 +229,12 @@ var testExpectations_WithInvoicesResourceInRequest = map[string]permissions.ForU
 			{Name: "sales person", ID: "123e4567-e89b-12d3-a456-426614174000"},
 			{Name: "sales auditor", ID: "da244750-f014-415c-b7b9-43ead3d8fa25"},
 		},
-		Permissions: permissions.UserPermissions{
-			{Name: "invoices:create", ID: "2f9606d8-4bff-46e7-bd8f-ae9e476d3995"},
-			{Name: "invoices:read", ID: "8f20eca6-9859-4532-babb-65a528e1611e"},
-		},
 		Resources: permissions.Resources{
 			{Type: "invoices", ID: "6b63b489-61cb-4087-8636-f10716bd724e"},
 			{Type: "invoices", ID: "568104df-6ff3-40be-b660-91e3160aa7e6"},
 		},
+		RevokedPermissions: permissions.UserRevokedPermissions{},
+		ExtraPermissions:   permissions.UserExtraPermissions{},
 	},
 }
 
@@ -275,7 +256,8 @@ func TestGetForUser_LambdaGetUserPermissions(t *testing.T) {
 			}
 
 			assert.EqualValues(t, expectations.Roles, fu.Roles)
-			assert.EqualValues(t, expectations.Permissions, fu.Permissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.RevokedPermissions, fu.RevokedPermissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.ExtraPermissions, fu.ExtraPermissions, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.Resources, fu.Resources, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.RoleMap, fu.RoleMap, "user ID: %s", userID)
 		}
@@ -293,7 +275,8 @@ func TestGetForUser_LambdaGetUserPermissions(t *testing.T) {
 			}
 
 			assert.EqualValues(t, expectations.Roles, fu.Roles)
-			assert.EqualValues(t, expectations.Permissions, fu.Permissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.RevokedPermissions, fu.RevokedPermissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.ExtraPermissions, fu.ExtraPermissions, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.Resources, fu.Resources, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.RoleMap, fu.RoleMap, "user ID: %s", userID)
 		}
@@ -310,7 +293,8 @@ func TestGetForUser_LambdaGetUserPermissions(t *testing.T) {
 			}
 
 			assert.EqualValues(t, expectations.Roles, fu.Roles)
-			assert.EqualValues(t, expectations.Permissions, fu.Permissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.RevokedPermissions, fu.RevokedPermissions, "user ID: %s", userID)
+			assert.EqualValues(t, expectations.ExtraPermissions, fu.ExtraPermissions, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.Resources, fu.Resources, "user ID: %s", userID)
 			assert.EqualValues(t, expectations.RoleMap, fu.RoleMap, "user ID: %s", userID)
 		}
